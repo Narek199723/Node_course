@@ -27,13 +27,15 @@ exports.postAddProduct = async (req, res, next) => {
     }
 };
 
-exports.getEditProduct = (req, res, next) => {
+exports.getEditProduct = async (req, res, next) => {
     const editMode = req.query.edit;
     if (!editMode) {
         return res.redirect("/");
     }
     const prodId = req.params.productId;
-    Product.findById(prodId, (product) => {
+    try {
+        const product = await Product.findById(prodId);
+        
         if (!product) {
             return res.redirect("/");
         }
@@ -43,7 +45,9 @@ exports.getEditProduct = (req, res, next) => {
             editing: editMode,
             product: product,
         });
-    });
+    } catch (error) {
+        console.log(error);
+    }
 };
 
 exports.postEditProduct = (req, res, next) => {
@@ -63,14 +67,17 @@ exports.postEditProduct = (req, res, next) => {
     res.redirect("/admin/products");
 };
 
-exports.getProducts = (req, res, next) => {
-    Product.fetchAll((products) => {
+exports.getProducts = async (req, res, next) => {
+    try {
+        const products = await Product.fetchAll();
         res.render("admin/products", {
             prods: products,
             pageTitle: "Admin Products",
             path: "/admin/products",
         });
-    });
+    } catch (error) {
+        console.log(error);
+    }
 };
 
 exports.postDeleteProduct = (req, res, next) => {
